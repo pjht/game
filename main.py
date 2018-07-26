@@ -121,27 +121,30 @@ def break_block():
   tmap[y][x]=BACKGROUND
 
 def hande_key(key):
-    global inv
-    global move
-    global move_key
-    move_keys=[pygame.K_UP,pygame.K_DOWN,pygame.K_LEFT,pygame.K_RIGHT]
-    if key==pygame.K_SPACE:
-      generate_world()
-      refresh_screen()
-    elif key==pygame.K_SLASH:
-      break_block()
-    elif key==pygame.K_e:
-      inv=not inv
-      if inv:
-        move=False
-    elif key in move_keys:
-      move=True
-      move_key=key
+  global inventory
+  global inv
+  global move
+  global move_key
+  move_keys=[pygame.K_UP,pygame.K_DOWN,pygame.K_LEFT,pygame.K_RIGHT]
+  if key==pygame.K_SPACE:
+    inventory={}
+    generate_world()
+    refresh_screen()
+  elif key==pygame.K_SLASH:
+    break_block()
+  elif key==pygame.K_e:
+    inv=not inv
+    if inv:
+      move=False
+  elif key in move_keys:
+    move=True
+    move_key=key
 
 def show_inv():
   global inv
   screen.fill([255,255,255])
   string=""
+  print(string)
   for item, count in inventory.items():
     string+="{} {}\n".format(count,item)
   text=helvetica_neue.render(string, False, (0, 0, 0))
