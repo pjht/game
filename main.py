@@ -3,7 +3,7 @@ import os
 import random
 import math
 from time import sleep
-frames={}
+player_frames={}
 tiles={}
 tmap=[]
 inventory={}
@@ -18,7 +18,7 @@ item_to_block={
   "wood":("floor_vert","floor_vert","floor_horiz","floor_horiz"),
   "cobblestone":("cobblestone","cobblestone","cobblestone","cobblestone")
 }
-solid=["bed_top","bed_bot","tree","cobblestone"]
+solid=["bed_top","bed_bot","tree","cobblestone","door"]
 player_info={"frame":1,"direction":"right","x":0,"y":0}
 BACKGROUND="grass"
 TILESIZE=16
@@ -28,8 +28,30 @@ FONTSIZE=30
 WINDWIDTH=MAPWIDTH*TILESIZE
 WINDHEIGHT=(MAPHEIGHT+1)*TILESIZE
 PLAYER_MOVE=TILESIZE
-DELAY=0.08
-def load_frames():
+DELAY=0.1
+
+class Animation:
+  def __init__(self,frame_array,n_frames,name,screen):
+   self.frame_array=frame_array
+   self.x=0
+   self.y=0
+   self.screen=screen
+   self.frame=0
+   self.n_frames=n_frames
+   self.name=name
+  def draw(self):
+    if self.frame+1>self.n_frames:
+      self.frame=0
+      return False
+    img=self.frame_array[self.frame]
+    self.screen.blit(tiles[BACKGROUND],(self.x*TILESIZE,self.y*TILESIZE))
+    self.screen.blit(img,(self.x*TILESIZE,self.y*TILESIZE))
+    pygame.display.flip()
+    self.frame+=1
+    return True
+
+
+def load_player_frames():
   directions=["up","down","left","right"]
   num_frames=3
   for direction in directions:
@@ -39,7 +61,27 @@ def load_frames():
       img_name="{}_{}.png".format(direction,i)
       frame_array[i]=pygame.image.load(os.path.join("sprites","player",img_name))
       i+=1
-    frames[direction]=frame_array
+    player_frames[direction]=frame_array
+
+def load_anim(name,num_frames):
+  frames=[]
+  i=0
+  while i<num_frames:
+    img_name="{}.png".format(i)
+    frames.append(pygame.image.load(os.path.join("animation",name,img_name)))
+    i+=1
+  anim=Animation(frames,num_frames,name,screen)
+  return anim
+
+def load_reverse_anim(name,num_frames):
+  frames=[]
+  i=num_frames-1
+  while i>=0:
+    img_name="{}.png".format(i)
+    frames.append(pygame.image.load(os.path.join("animation",name,img_name)))
+    i-=1
+  anim=Animation(frames,num_frames,name,screen)
+  return anim
 
 def load_tiles():
   directory=os.fsencode("tiles")
@@ -70,12 +112,16 @@ def generate_world():
         tmap[y].append(GRASS)
       x+=1
     y+=1
-
+  tmap[4][3]=DOOR
 def refresh_screen():
   y=0
   while y<MAPHEIGHT:
     x=0
     while x<MAPWIDTH:
+      for anim in anims:
+        if anim.x==x and anim.y==y:
+          x+=1
+          continue
       screen.blit(tiles[BACKGROUND],(x*TILESIZE,y*TILESIZE))
       x+=1
     y+=1
@@ -83,6 +129,10 @@ def refresh_screen():
   while y<MAPHEIGHT:
     x=0
     while x<MAPWIDTH:
+      for anim in anims:
+        if anim.x==x and anim.y==y:
+          x+=1
+          continue
       screen.blit(tiles[tmap[y][x]],(x*TILESIZE,y*TILESIZE))
       x+=1
     y+=1
@@ -90,7 +140,7 @@ def refresh_screen():
   frame=player_info["frame"]
   x=player_info["x"]
   y=player_info["y"]
-  player_img=frames[dir][frame]
+  player_img=player_frames[dir][frame]
   screen.blit(player_img,(x,y))
   if selected!="":
     texture=item_to_block[selected][0]
@@ -196,6 +246,27 @@ def select_prev():
   if newsel!="":
     selected=newsel
 
+def interact():
+  coords=get_facing_tile()
+  if coords==False:
+    return
+  x=coords[0]
+  y=coords[1]
+  tile=tmap[y][x]
+  if tile==BACKGROUND:
+    place_block()
+  elif tile==DOOR:
+    anim=load_anim("door",4)
+    anim.name="door_open"
+    anim.x=x
+    anim.y=y
+    anims.append(anim)
+  elif tile==DOOR_OPEN:
+    anim=load_reverse_anim("door",4)
+    anim.name="door_close"
+    anim.x=x
+    anim.y=y
+    anims.append(anim)
 def hande_key(key):
   global inventory
   global inv
@@ -209,7 +280,7 @@ def hande_key(key):
   elif key==pygame.K_SLASH:
     break_block()
   elif key==pygame.K_PERIOD:
-    place_block()
+    interact()
   elif key==pygame.K_n:
     select_next()
   elif key==pygame.K_p:
@@ -246,7 +317,9 @@ def main():
   global helvetica_neue
   helvetica_neue=pygame.font.SysFont('Helvetica Neue', FONTSIZE)
   running=True
-  load_frames()
+  load_player_frames()
+  global anims
+  anims=[]
   load_tiles()
   generate_world()
   refresh_screen()
@@ -298,6 +371,24 @@ def main():
         player_info["x"]=old_x
         player_info["y"]=old_y
     if not inv:
+      i=0
+      for anim in anims:
+        keep=anim.draw()
+        if not keep:
+          if anim.name=="door_open":
+            x=anim.x
+            y=anim.y
+            tmap[y][x]=DOOR_OPEN
+            screen.blit(tiles[tmap[y][x]],(x*TILESIZE,y*TILESIZE))
+            pygame.display.flip()
+          if anim.name=="door_close":
+            x=anim.x
+            y=anim.y
+            tmap[y][x]=DOOR
+            screen.blit(tiles[tmap[y][x]],(x*TILESIZE,y*TILESIZE))
+            pygame.display.flip()
+          del anims[i]
+        i+=1
       refresh_screen()
       sleep(DELAY)
 main()
