@@ -7,15 +7,26 @@ frames={}
 tiles={}
 tmap=[]
 inventory={}
-drops={"tree":(8,"wood")}
-solid=["bed_top","bed_bot","tree"]
+selected=""
+drops={
+  "tree":(8,"wood"),
+  "floor_vert":(1,"wood"),
+  "floor_horiz":(1,"wood"),
+  "cobblestone":(8,"cobblestone")
+}
+item_to_block={
+  "wood":("floor_vert","floor_vert","floor_horiz","floor_horiz"),
+  "cobblestone":("cobblestone","cobblestone","cobblestone","cobblestone")
+}
+solid=["bed_top","bed_bot","tree","cobblestone"]
 player_info={"frame":1,"direction":"right","x":0,"y":0}
 BACKGROUND="grass"
 TILESIZE=16
 MAPWIDTH=32
 MAPHEIGHT=32
+FONTSIZE=30
 WINDWIDTH=MAPWIDTH*TILESIZE
-WINDHEIGHT=MAPHEIGHT*TILESIZE
+WINDHEIGHT=(MAPHEIGHT+1)*TILESIZE
 PLAYER_MOVE=TILESIZE
 DELAY=0.08
 def load_frames():
@@ -50,11 +61,16 @@ def generate_world():
     while x<MAPWIDTH:
       num=random.randint(0,101)
       if num<5:
-        tmap[y].append(TREE)
+        num=random.randint(0,101)
+        if num<50:
+          tmap[y].append(TREE)
+        else:
+          tmap[y].append(COBBLESTONE)
       else:
         tmap[y].append(GRASS)
       x+=1
     y+=1
+
 def refresh_screen():
   y=0
   while y<MAPHEIGHT:
@@ -76,11 +92,14 @@ def refresh_screen():
   y=player_info["y"]
   player_img=frames[dir][frame]
   screen.blit(player_img,(x,y))
+  if selected!="":
+    texture=item_to_block[selected][0]
+    screen.blit(tiles[texture],(0*TILESIZE,32*TILESIZE))
   pygame.display.flip()
 
 def get_facing_tile():
-  x=math.floor(player_info["x"]/16)
-  y=math.floor(player_info["y"]/16)
+  x=math.floor(player_info["x"]/TILESIZE)
+  y=math.floor(player_info["y"]/TILESIZE)
   dir=player_info["direction"]
   if dir=="up":
     y-=1
@@ -90,11 +109,11 @@ def get_facing_tile():
     x-=1
   elif dir=="right":
     x+=1
-  if x>31:
+  if x>MAPWIDTH-1:
     return False
   if x<0:
     return False
-  if y>31:
+  if y>MAPHEIGHT-1:
     return False
   if y<0:
     return False
@@ -109,6 +128,8 @@ def handle_break(tile):
         inventory[name]=numb+count
       else:
         inventory[name]=count
+      global selected
+      selected=name
 
 def break_block():
   coords=get_facing_tile()
@@ -119,6 +140,61 @@ def break_block():
   tile=tmap[y][x]
   handle_break(tile)
   tmap[y][x]=BACKGROUND
+
+def place_block():
+  global selected
+  if selected:
+    if not selected in inventory.keys():
+      return
+    coords=get_facing_tile()
+    if coords==False:
+      return
+    x=coords[0]
+    y=coords[1]
+    tile=tmap[y][x]
+    if tile in item_to_block[selected]:
+      return
+    if not tile==BACKGROUND:
+      return
+    count=inventory[selected]
+    count=count-1
+    inventory[selected]=count
+    if count==0:
+      del inventory[selected]
+    to=item_to_block[selected]
+    if player_info["direction"]=="up":
+      tmap[y][x]=to[0]
+    elif player_info["direction"]=="down":
+      tmap[y][x]=to[1]
+    elif player_info["direction"]=="left":
+      tmap[y][x]=to[2]
+    elif player_info["direction"]=="right":
+      tmap[y][x]=to[3]
+    if count==0:
+      selected=""
+
+def select_next():
+  global selected
+  newsel=""
+  ok_next=False
+  for item, count in inventory.items():
+    if ok_next:
+      newsel=item
+      break
+    if item==selected:
+      ok_next=True
+  if newsel!="":
+    selected=newsel
+
+def select_prev():
+  global selected
+  newsel=""
+  for item, count in inventory.items():
+    if item==selected:
+      break
+    newsel=item
+  if newsel!="":
+    selected=newsel
 
 def hande_key(key):
   global inventory
@@ -132,10 +208,19 @@ def hande_key(key):
     refresh_screen()
   elif key==pygame.K_SLASH:
     break_block()
+  elif key==pygame.K_PERIOD:
+    place_block()
+  elif key==pygame.K_n:
+    select_next()
+  elif key==pygame.K_p:
+    select_prev()
   elif key==pygame.K_e:
     inv=not inv
     if inv:
       move=False
+    else:
+      screen.fill([0,0,0])
+      refresh_screen()
   elif key in move_keys:
     move=True
     move_key=key
@@ -143,20 +228,23 @@ def hande_key(key):
 def show_inv():
   global inv
   screen.fill([255,255,255])
-  string=""
-  print(string)
+  text=[]
+  label=[]
   for item, count in inventory.items():
-    string+="{} {}\n".format(count,item)
-  text=helvetica_neue.render(string, False, (0, 0, 0))
-  screen.blit(text,(0,0))
+    text.append("{} {}".format(count,item))
+  for line in text:
+    label.append(helvetica_neue.render(line, True, (0,0,0)))
+  for line in range(len(label)):
+    screen.blit(label[line],(1,(line*FONTSIZE)+(2*line)))
   pygame.display.flip()
+
 def main():
   pygame.init()
   pygame.display.set_caption("game")
   global screen
   screen=pygame.display.set_mode((WINDWIDTH,WINDHEIGHT))
   global helvetica_neue
-  helvetica_neue=pygame.font.SysFont('Helvetica Neue', 30)
+  helvetica_neue=pygame.font.SysFont('Helvetica Neue', FONTSIZE)
   running=True
   load_frames()
   load_tiles()
