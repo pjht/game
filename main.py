@@ -2,9 +2,16 @@ import pygame
 import os
 import random
 import math
+import pprint
 from time import sleep
 player_frames={}
 tiles={}
+tiledata={}
+init_data={
+  "workbench":{
+    "items":{}
+  }
+}
 tmap=[]
 inventory={}
 selected=""
@@ -16,10 +23,18 @@ drops={
 }
 item_to_block={
   "wood":("floor_vert","floor_vert","floor_horiz","floor_horiz"),
-  "cobblestone":("cobblestone","cobblestone","cobblestone","cobblestone")
+  "cobblestone":("cobblestone","cobblestone","cobblestone","cobblestone"),
+  "stone_wall":("stone_wall","stone_wall","stone_wall","stone_wall")
 }
-solid=["bed_top","bed_bot","tree","cobblestone","door"]
+crafts={
+  "stone_wall":{"cobblestone":6},
+  "door":{"wood":6},
+  "workbench":{"wood":4}
+}
+
+clear=["grass","door_open"]
 player_info={"frame":1,"direction":"right","x":0,"y":0}
+pprinter=pprint.PrettyPrinter()
 BACKGROUND="grass"
 TILESIZE=16
 MAPWIDTH=32
@@ -50,6 +65,8 @@ class Animation:
     self.frame+=1
     return True
 
+def pp(arg):
+  pprinter.pprint(arg)
 
 def load_player_frames():
   directions=["up","down","left","right"]
@@ -112,7 +129,8 @@ def generate_world():
         tmap[y].append(GRASS)
       x+=1
     y+=1
-  tmap[4][3]=DOOR
+  add_item("workbench",1)
+
 def refresh_screen():
   y=0
   while y<MAPHEIGHT:
@@ -143,7 +161,10 @@ def refresh_screen():
   player_img=player_frames[dir][frame]
   screen.blit(player_img,(x,y))
   if selected!="":
-    texture=item_to_block[selected][0]
+    if selected in item_to_block:
+      texture=item_to_block[selected][0]
+    else:
+      texture=selected
     screen.blit(tiles[texture],(0*TILESIZE,32*TILESIZE))
   else:
     rect=pygame.Rect(0*TILESIZE,32*TILESIZE,1*TILESIZE,33*TILESIZE)
@@ -172,17 +193,25 @@ def get_facing_tile():
     return False
   return (x,y)
 
+def add_item(name,count):
+  global selected
+  if name in inventory.keys():
+    numb=inventory[name]
+    inventory[name]=numb+count
+  else:
+    inventory[name]=count
+  selected=name
+
 def handle_break(tile):
-    if tile in drops.keys():
-      count=drops[tile][0]
-      name=drops[tile][1]
-      if name in inventory.keys():
-        numb=inventory[name]
-        inventory[name]=numb+count
-      else:
-        inventory[name]=count
-      global selected
-      selected=name
+  if tile in drops.keys():
+    count=drops[tile][0]
+    name=drops[tile][1]
+  elif tile=="grass":
+    return
+  else:
+    count=1
+    name=tile
+  add_item(name,count)
 
 def break_block():
   coords=get_facing_tile()
@@ -193,6 +222,8 @@ def break_block():
   tile=tmap[y][x]
   handle_break(tile)
   tmap[y][x]=BACKGROUND
+  if (x,y) in tiledata:
+    del tiledata[(x,y)]
 
 def place_block():
   global selected
@@ -205,8 +236,9 @@ def place_block():
     x=coords[0]
     y=coords[1]
     tile=tmap[y][x]
-    if tile in item_to_block[selected]:
-      return
+    if selected in item_to_block:
+      if tile in item_to_block[selected]:
+        return
     if not tile==BACKGROUND:
       return
     count=inventory[selected]
@@ -214,7 +246,10 @@ def place_block():
     inventory[selected]=count
     if count==0:
       del inventory[selected]
-    to=item_to_block[selected]
+    if selected in item_to_block:
+      to=item_to_block[selected]
+    else:
+      to=(selected,selected,selected,selected)
     if player_info["direction"]=="up":
       tmap[y][x]=to[0]
     elif player_info["direction"]=="down":
@@ -223,6 +258,8 @@ def place_block():
       tmap[y][x]=to[2]
     elif player_info["direction"]=="right":
       tmap[y][x]=to[3]
+    if selected in init_data:
+      tiledata[(x,y)]=init_data[selected]
     if count==0:
       selected=""
 
@@ -270,11 +307,35 @@ def interact():
     anim.x=x
     anim.y=y
     anims.append(anim)
+  elif tile==WORKBENCH:
+    global selected
+    data=tiledata[(x,y)]
+    items=data["items"]
+    if selected:
+      inventory[selected]-=1
+      if selected in items.keys():
+        items[selected]+=1
+      else:
+        items[selected]=1
+      data["items"]=items
+      tiledata[(x,y)]=data
+      if inventory[selected]==0:
+        del inventory[selected]
+        selected=""
+    else:
+      if items in crafts.values():
+        out=""
+        for outp,reqs in crafts.items():
+          if items==reqs:
+            out=outp
+        data["items"]={}
+        add_item(out,1)
+
 def hande_key(key):
-  global inventory
   global inv
   global move
   global move_key
+  global selected
   move_keys=[pygame.K_UP,pygame.K_DOWN,pygame.K_LEFT,pygame.K_RIGHT]
   if key==pygame.K_SPACE:
     inventory={}
@@ -284,10 +345,12 @@ def hande_key(key):
     break_block()
   elif key==pygame.K_PERIOD:
     interact()
-  elif key==pygame.K_n:
+  elif key==pygame.K_l:
     select_next()
-  elif key==pygame.K_p:
+  elif key==pygame.K_j:
     select_prev()
+  elif key==pygame.K_k:
+    selected=""
   elif key==pygame.K_e:
     inv=not inv
     if inv:
@@ -370,7 +433,7 @@ def main():
       if player_info["y"]<0:
         player_info["y"]=old_y
       tile=tmap[math.floor(player_info["y"]/TILESIZE)][math.floor(player_info["x"]/TILESIZE)]
-      if tile in solid:
+      if not tile in clear:
         player_info["x"]=old_x
         player_info["y"]=old_y
     if not inv:
