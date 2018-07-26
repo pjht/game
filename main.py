@@ -6,7 +6,10 @@ from time import sleep
 frames={}
 tiles={}
 tmap=[]
-player_info={"frame":2,"direction":"right","x":0,"y":0}
+inventory={}
+drops={"tree":(8,"wood")}
+player_info={"frame":1,"direction":"right","x":0,"y":0}
+BACKGROUND="grass"
 TILESIZE=16
 MAPWIDTH=32
 MAPHEIGHT=32
@@ -46,13 +49,20 @@ def generate_world():
     while x<MAPWIDTH:
       num=random.randint(0,101)
       if num<5:
-        tmap[y].append(TREE_GRASS)
+        tmap[y].append(TREE)
       else:
         tmap[y].append(GRASS)
       x+=1
     y+=1
 
 def refresh_screen():
+  y=0
+  while y<MAPHEIGHT:
+    x=0
+    while x<MAPWIDTH:
+      screen.blit(tiles[BACKGROUND],(x*TILESIZE,y*TILESIZE))
+      x+=1
+    y+=1
   y=0
   while y<MAPHEIGHT:
     x=0
@@ -67,32 +77,93 @@ def refresh_screen():
   player_img=frames[dir][frame]
   screen.blit(player_img,(x,y))
   pygame.display.flip()
+
+def get_facing_tile():
+  x=math.floor(player_info["x"]/16)
+  y=math.floor(player_info["y"]/16)
+  dir=player_info["direction"]
+  if dir=="up":
+    y-=1
+  elif dir=="down":
+    y+=1
+  elif dir=="left":
+    x-=1
+  elif dir=="right":
+    x+=1
+  if x>31:
+    return False
+  if x<0:
+    return False
+  if y>31:
+    return False
+  if y<0:
+    return False
+  return (x,y)
+def handle_break(tile):
+    if tile in drops.keys():
+      count=drops[tile][0]
+      name=drops[tile][1]
+      if name in inventory.keys():
+        numb=inventory[name]
+        inventory[name]=numb+count
+      else:
+        inventory[name]=count
+
+def break_block():
+  coords=get_facing_tile()
+  if coords==False:
+    return
+  x=coords[0]
+  y=coords[1]
+  tile=tmap[y][x]
+  handle_break(tile)
+  tmap[y][x]=BACKGROUND
+
 def main():
   pygame.init()
   pygame.display.set_caption("game")
   global screen
   screen=pygame.display.set_mode((WINDWIDTH,WINDHEIGHT))
+  myfont=pygame.font.SysFont('Helvetica Neue', 30)
   running=True
   load_frames()
   load_tiles()
   generate_world()
   refresh_screen()
   move=False
+  inv=False
   move_key=0
   while running:
     for event in pygame.event.get():
       if event.type==pygame.QUIT:
         running=False
-      elif event.type==pygame.KEYDOWN:
-        if event.key==pygame.K_SPACE:
-          generate_world()
-          refresh_screen()
-        else:
-          move=True
-          move_key=event.key
-      elif event.type==pygame.KEYUP:
-        move=False
-        player_info["frame"]=2
+      if not inv:
+        if event.type==pygame.KEYDOWN:
+          if event.key==pygame.K_SPACE:
+            generate_world()
+            refresh_screen()
+          elif event.key==pygame.K_SLASH:
+            break_block()
+          elif event.key==pygame.K_e:
+            inv=True
+            move=False
+          elif event.key==pygame.K_UP or event.key==pygame.K_DOWN or event.key==pygame.K_LEFT or event.key==pygame.K_RIGHT:
+            move=True
+            move_key=event.key
+        elif event.type==pygame.KEYUP:
+          move=False
+          player_info["frame"]=1
+      else:
+        screen.fill([255,255,255])
+        string=""
+        for item, count in inventory.items():
+          string+="{} {}\n".format(count,item)
+        textsurface = myfont.render(string, False, (0, 0, 0))
+        screen.blit(textsurface,(0,0))
+        pygame.display.flip()
+        if event.type==pygame.KEYDOWN:
+          if event.key==pygame.K_e:
+            inv=False
     if move:
       old_x=player_info["x"]
       old_y=player_info["y"]
@@ -120,9 +191,10 @@ def main():
       if player_info["y"]<0:
         player_info["y"]=old_y
       tile=tmap[math.floor(player_info["y"]/TILESIZE)][math.floor(player_info["x"]/TILESIZE)]
-      if tile==TREE_GRASS:
+      if tile==TREE:
         player_info["x"]=old_x
         player_info["y"]=old_y
-    refresh_screen()
-    sleep(DELAY)
+    if not inv:
+      refresh_screen()
+      sleep(DELAY)
 main()
