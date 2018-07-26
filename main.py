@@ -145,6 +145,9 @@ def refresh_screen():
   if selected!="":
     texture=item_to_block[selected][0]
     screen.blit(tiles[texture],(0*TILESIZE,32*TILESIZE))
+  else:
+    rect=pygame.Rect(0*TILESIZE,32*TILESIZE,1*TILESIZE,33*TILESIZE)
+    screen.fill((0,0,0),rect)
   pygame.display.flip()
 
 def get_facing_tile():
