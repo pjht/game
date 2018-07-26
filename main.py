@@ -8,6 +8,7 @@ tiles={}
 tmap=[]
 inventory={}
 drops={"tree":(8,"wood")}
+solid=["bed_top","bed_bot","tree"]
 player_info={"frame":1,"direction":"right","x":0,"y":0}
 BACKGROUND="grass"
 TILESIZE=16
@@ -54,7 +55,6 @@ def generate_world():
         tmap[y].append(GRASS)
       x+=1
     y+=1
-
 def refresh_screen():
   y=0
   while y<MAPHEIGHT:
@@ -99,6 +99,7 @@ def get_facing_tile():
   if y<0:
     return False
   return (x,y)
+
 def handle_break(tile):
     if tile in drops.keys():
       count=drops[tile][0]
@@ -119,17 +120,48 @@ def break_block():
   handle_break(tile)
   tmap[y][x]=BACKGROUND
 
+def hande_key(key):
+    global inv
+    global move
+    global move_key
+    move_keys=[pygame.K_UP,pygame.K_DOWN,pygame.K_LEFT,pygame.K_RIGHT]
+    if key==pygame.K_SPACE:
+      generate_world()
+      refresh_screen()
+    elif key==pygame.K_SLASH:
+      break_block()
+    elif key==pygame.K_e:
+      inv=not inv
+      if inv:
+        move=False
+    elif key in move_keys:
+      move=True
+      move_key=key
+
+def show_inv():
+  global inv
+  screen.fill([255,255,255])
+  string=""
+  for item, count in inventory.items():
+    string+="{} {}\n".format(count,item)
+  text=helvetica_neue.render(string, False, (0, 0, 0))
+  screen.blit(text,(0,0))
+  pygame.display.flip()
 def main():
   pygame.init()
   pygame.display.set_caption("game")
   global screen
   screen=pygame.display.set_mode((WINDWIDTH,WINDHEIGHT))
-  myfont=pygame.font.SysFont('Helvetica Neue', 30)
+  global helvetica_neue
+  helvetica_neue=pygame.font.SysFont('Helvetica Neue', 30)
   running=True
   load_frames()
   load_tiles()
   generate_world()
   refresh_screen()
+  global move
+  global inv
+  global move_key
   move=False
   inv=False
   move_key=0
@@ -137,33 +169,13 @@ def main():
     for event in pygame.event.get():
       if event.type==pygame.QUIT:
         running=False
-      if not inv:
-        if event.type==pygame.KEYDOWN:
-          if event.key==pygame.K_SPACE:
-            generate_world()
-            refresh_screen()
-          elif event.key==pygame.K_SLASH:
-            break_block()
-          elif event.key==pygame.K_e:
-            inv=True
-            move=False
-          elif event.key==pygame.K_UP or event.key==pygame.K_DOWN or event.key==pygame.K_LEFT or event.key==pygame.K_RIGHT:
-            move=True
-            move_key=event.key
-        elif event.type==pygame.KEYUP:
-          move=False
-          player_info["frame"]=1
-      else:
-        screen.fill([255,255,255])
-        string=""
-        for item, count in inventory.items():
-          string+="{} {}\n".format(count,item)
-        textsurface = myfont.render(string, False, (0, 0, 0))
-        screen.blit(textsurface,(0,0))
-        pygame.display.flip()
-        if event.type==pygame.KEYDOWN:
-          if event.key==pygame.K_e:
-            inv=False
+      elif event.type==pygame.KEYDOWN:
+        hande_key(event.key)
+      elif event.type==pygame.KEYUP:
+        move=False
+        player_info["frame"]=1
+      if inv:
+        show_inv()
     if move:
       old_x=player_info["x"]
       old_y=player_info["y"]
@@ -191,7 +203,7 @@ def main():
       if player_info["y"]<0:
         player_info["y"]=old_y
       tile=tmap[math.floor(player_info["y"]/TILESIZE)][math.floor(player_info["x"]/TILESIZE)]
-      if tile==TREE:
+      if tile in solid:
         player_info["x"]=old_x
         player_info["y"]=old_y
     if not inv:
