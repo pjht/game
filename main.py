@@ -22,15 +22,12 @@ drops={
   "tree":(8,"wood"),
   "floor_vert":(1,"wood"),
   "floor_horiz":(1,"wood"),
-  "cobblestone":(8,"cobblestone")
 }
 item_to_block={
   "wood":("floor_vert","floor_vert","floor_horiz","floor_horiz"),
   "cobblestone":("cobblestone","cobblestone","cobblestone","cobblestone"),
-  "stone_wall":("stone_wall","stone_wall","stone_wall","stone_wall")
 }
 crafts={
-  "stone_wall":{"cobblestone":6},
   "door":{"wood":6},
   "workbench":{"wood":4}
 }
