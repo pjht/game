@@ -4,6 +4,9 @@ import random
 import math
 import pprint
 from time import sleep
+import sys
+import select
+
 player_frames={}
 tiles={}
 tiledata={}
@@ -396,6 +399,19 @@ def main():
   inv=False
   move_key=0
   while running:
+    if select.select([sys.stdin,],[],[],0.0)[0]:
+      cmd=input()
+      cmd=cmd.split()
+      if cmd[0]=="give":
+        if len(cmd)==2:
+          item=cmd[1]
+          count=1
+        elif len(cmd)==3:
+          item=cmd[1]
+          count=int(cmd[2])
+        else:
+          print("give <item> [count]")
+        add_item(item,count)
     for event in pygame.event.get():
       if event.type==pygame.QUIT:
         running=False
