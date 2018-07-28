@@ -7,29 +7,38 @@ from time import sleep
 import sys
 import select
 
-player_frames={}
+tmap=[]
 tiles={}
 tiledata={}
+
 init_data={
   "workbench":{
     "items":{}
   }
 }
-tmap=[]
-inventory={}
-selected=""
+
 drops={
   "tree":(8,"wood"),
   "floor_vert":(1,"wood"),
   "floor_horiz":(1,"wood"),
 }
+
 item_to_block={
-  "wood":("floor_vert","floor_vert","floor_horiz","floor_horiz"),
-  "cobblestone":("cobblestone","cobblestone","cobblestone","cobblestone"),
+  "wood":("floor_vert","floor_vert","floor_horiz","floor_horiz")
 }
+
 crafts={
   "door":{"wood":6},
   "workbench":{"wood":4}
+}
+
+player_frames={}
+inventory={}
+selected=""
+
+anim_end={
+  "door_open":"door_open",
+  "door_close":"door"
 }
 
 clear=["grass","door_open"]
@@ -228,19 +237,12 @@ def break_block():
 def place_block():
   global selected
   if selected:
-    if not selected in inventory.keys():
-      return
     coords=get_facing_tile()
     if coords==False:
       return
     x=coords[0]
     y=coords[1]
     tile=tmap[y][x]
-    if selected in item_to_block:
-      if tile in item_to_block[selected]:
-        return
-    if not tile==BACKGROUND:
-      return
     count=inventory[selected]
     count=count-1
     inventory[selected]=count
@@ -328,12 +330,15 @@ def interact():
         for outp,reqs in crafts.items():
           if items==reqs:
             out=outp
+            break
         data["items"]={}
         add_item(out,1)
 
 def hande_key(key):
   global inv
   global move
+  global move_key
+  global selected
   global move_key
   global selected
   move_keys=[pygame.K_UP,pygame.K_DOWN,pygame.K_LEFT,pygame.K_RIGHT]
@@ -396,7 +401,7 @@ def main():
   inv=False
   move_key=0
   while running:
-    if select.select([sys.stdin,],[],[],0.0)[0]:
+    if select.select([sys.stdin],[],[],0.0)[0]:
       cmd=input()
       cmd=cmd.split()
       if cmd[0]=="give":
@@ -454,6 +459,13 @@ def main():
       for anim in anims:
         keep=anim.draw()
         if not keep:
+          if anim.name in anim_end.keys():
+            tile=anim_end[anim.name]
+            x=anim.x
+            y=anim.y
+            tmap[y][x]=tile
+            screen.blit(tiles[tmap[y][x]],(x*TILESIZE,y*TILESIZE))
+            pygame.display.flip()
           if anim.name=="door_open":
             x=anim.x
             y=anim.y
