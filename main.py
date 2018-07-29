@@ -77,7 +77,7 @@ class Animation:
 def pp(arg):
   pprinter.pprint(arg)
 
-def load_player_frames():
+def load_player_frames(type):
   directions=["up","down","left","right"]
   num_frames=3
   for direction in directions:
@@ -85,7 +85,7 @@ def load_player_frames():
     i=0
     while i<num_frames:
       img_name="{}_{}.png".format(direction,i)
-      frame_array[i]=pygame.image.load(os.path.join("sprites","player",img_name))
+      frame_array[i]=pygame.image.load(os.path.join("sprites",type,img_name))
       i+=1
     player_frames[direction]=frame_array
 
@@ -388,7 +388,7 @@ def main():
   global helvetica_neue
   helvetica_neue=pygame.font.SysFont('Helvetica Neue', FONTSIZE)
   running=True
-  load_player_frames()
+  load_player_frames("player")
   global anims
   anims=[]
   load_tiles()
@@ -408,12 +408,19 @@ def main():
         if len(cmd)==2:
           item=cmd[1]
           count=1
+          add_item(item,count)
         elif len(cmd)==3:
           item=cmd[1]
           count=int(cmd[2])
+          add_item(item,count)
         else:
           print("give <item> [count]")
-        add_item(item,count)
+      if cmd[0]=="slime_mode":
+        player_frames={}
+        load_player_frames("slime")
+      if cmd[0]=="normal_mode":
+        player_frames={}
+        load_player_frames("player")
     for event in pygame.event.get():
       if event.type==pygame.QUIT:
         running=False
@@ -446,7 +453,7 @@ def main():
         player_info["x"]=old_x
       if player_info["x"]<0:
         player_info["x"]=old_x
-      if player_info["y"]>=WINDHEIGHT:
+      if player_info["y"]>=WINDHEIGHT-16:
         player_info["y"]=old_y
       if player_info["y"]<0:
         player_info["y"]=old_y
