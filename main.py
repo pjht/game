@@ -180,17 +180,16 @@ def refresh_screen():
     screen.fill((0,0,0),rect)
   pygame.display.flip()
 
-def get_facing_tile():
-  x=math.floor(player_info["x"]/TILESIZE)
-  y=math.floor(player_info["y"]/TILESIZE)
-  dir=player_info["direction"]
-  if dir=="up":
+def get_facing_tile(self):
+  x=self.x/TILESIZE
+  y=self.y/TILESIZE
+  if self.dir=="up":
     y-=1
-  elif dir=="down":
+  elif self.dir=="down":
     y+=1
-  elif dir=="left":
+  elif self.dir=="left":
     x-=1
-  elif dir=="right":
+  elif self.dir=="right":
     x+=1
   if x>MAPWIDTH-1:
     return False
