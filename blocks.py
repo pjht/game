@@ -1,31 +1,27 @@
 from lib import block,blockregistry
 from lib.blockregistry import BlockRegistry
 from lib.block import Block
+import pygame
 
-class BlockStone(Block):
-  @classmethod
-  def init(cls):
-    BlockRegistry.registerBlock(cls,"stone")
+def make_block(klass_name,name,clear):
+  def blk_init():
+    pass
+  def init(self,x,y,screen):
+    Block.__init__(self,x,y,screen)
+    self.setTextureName(name)
+    self.clear=clear
+    self.unlocalisedName=name
+  attr_table={
+    "unlocalisedName":name,
+    "__init__":init,
+    "init":blk_init,
+  }
+  klass=type(klass_name,(Block,),attr_table)
+  BlockRegistry.registerBlock(klass,name)
+  glob=globals()
+  glob[klass_name]=klass
+  return klass
 
-  def __init__(self,x,y,screen):
-    super().__init__(x,y,screen)
-    super().setTextureName("stone")
-
-class BlockTree(Block):
-  @classmethod
-  def init(cls):
-    BlockRegistry.registerBlock(cls,"tree")
-
-  def __init__(self,x,y,screen):
-    super().__init__(x,y,screen)
-    super().setTextureName("tree")
-
-class BlockGrass(Block):
-  @classmethod
-  def init(cls):
-    BlockRegistry.registerBlock(cls,"grass")
-
-  def __init__(self,x,y,screen):
-    super().__init__(x,y,screen)
-    super().setTextureName("grass")
-    self.clear=True
+make_block("BlockStone","stone",False)
+make_block("BlockTree","tree",False)
+make_block("BlockGrass","grass",True)

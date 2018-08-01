@@ -29,8 +29,10 @@ if __name__ == '__main__':
       if event.type==pygame.QUIT:
         running=False
       elif event.type==pygame.KEYDOWN:
-        if event.key==pygame.K_SLASH:
+        if event.key==pygame.K_PERIOD:
           player.interact()
+        if event.key==pygame.K_SLASH:
+          player.attack()
         if event.key in key_to_dir.keys():
           move=True
           dir=key_to_dir[event.key]

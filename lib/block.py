@@ -18,7 +18,7 @@ class Block(Sprite):
     self.screen=screen
     self.tname=None
     self.clear=False
-
+    self.unlocalisedName=""
   def draw(self):
     if self.tname==None:
       raise Exception("No texture name for block. Did you forget to call setTextureName?")

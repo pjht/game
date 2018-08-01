@@ -3,6 +3,7 @@ import lib.constants as constants
 class Player(Character):
   def __init__(self,x,y,map,screen,*groups):
     super().__init__(x,y,"player",map,screen,*groups)
+    self.inv={}
   def facingTile(self):
     x=self.x/constants.TILESIZE
     y=self.y/constants.TILESIZE
@@ -29,3 +30,8 @@ class Player(Character):
       return
     tile=self.map.tileAt(coords[0],coords[1])
     tile.interact()
+  def attack(self):
+    coords=self.facingTile()
+    if coords==False:
+      return
+    tile=self.map.tileAt(coords[0],coords[1])
