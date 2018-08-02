@@ -1,9 +1,9 @@
 import pygame
 import random
 from pygame.sprite import Group
-from . import block,blockregistry
+from . import block,gameregistry
 from . import constants
-from .blockregistry import BlockRegistry
+from .gameregistry import GameRegistry
 from .block import Block
 class Map(Group):
   def __init__(self,screen):
@@ -12,7 +12,7 @@ class Map(Group):
     self.generate()
 
   def addTile(self,tname,x,y):
-    klass=BlockRegistry.block_classes[tname]
+    klass=GameRegistry.block_classes[tname]
     tile=klass(x,y,self.screen)
     super().add(tile)
 

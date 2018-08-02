@@ -11,19 +11,24 @@ class Block(Sprite):
     for klass in subclasses:
       klass.init()
 
-  def __init__(self,x,y,screen,*groups):
-    super().__init__(groups)
+  def __init__(self,x,y,screen):
+    super().__init__()
     self.x=x
     self.y=y
     self.screen=screen
     self.tname=None
     self.clear=False
     self.unlocalisedName=""
+    self.customDraw=False
+
   def draw(self):
     if self.tname==None:
       raise Exception("No texture name for block. Did you forget to call setTextureName?")
     self.screen.blit(Block.background,(self.x*constants.TILESIZE,self.y*constants.TILESIZE))
-    self.screen.blit(Block.textures[self.tname],(self.x*constants.TILESIZE,self.y*constants.TILESIZE))
+    texture=self.getTexture()
+    if texture==False:
+      texture=Block.textures[self.tname]
+    self.screen.blit(texture,(self.x*constants.TILESIZE,self.y*constants.TILESIZE))
 
   def setTextureName(self,name):
     if not name in Block.textures.keys():
@@ -32,3 +37,6 @@ class Block(Sprite):
 
   def interact(self):
     pass
+
+  def getTexture(self):
+    return False

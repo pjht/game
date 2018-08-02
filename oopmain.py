@@ -1,19 +1,22 @@
 import pygame
 import os
 import random
-from lib import *
 import lib.constants as constants
 from lib.map import Map
 from lib.character import Character
+from lib.block import Block
 from blocks import *
 from player import *
 from time import sleep
 DELAY=0.1
 pygame.init()
-block.Block.init()
+Block.init()
 pygame.display.set_caption("game")
 screen=pygame.display.set_mode((constants.WINDWIDTH,constants.WINDHEIGHT))
 map=Map(screen)
+tile=map.tileAt(4,3)
+map.remove(tile)
+map.addTile("door",4,3)
 player=Player(0,0,map,screen)
 if __name__ == '__main__':
   running=True

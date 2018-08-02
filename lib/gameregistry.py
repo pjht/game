@@ -1,4 +1,4 @@
-class BlockRegistry:
+class GameRegistry:
   block_classes={}
 
   @classmethod
