@@ -36,6 +36,12 @@ if __name__ == '__main__':
           player.interact()
         if event.key==pygame.K_SLASH:
           player.attack()
+        if event.key==pygame.K_j:
+          player.inv.selPrev()
+        if event.key==pygame.K_k:
+          player.inv.clearSel()
+        if event.key==pygame.K_l:
+          player.inv.selNext()
         if event.key in key_to_dir.keys():
           move=True
           dir=key_to_dir[event.key]
@@ -44,6 +50,12 @@ if __name__ == '__main__':
         player.frame=1
     if move:
       player.move(dir)
+    screen.fill([0,0,0])
     map.draw()
     player.draw()
+    selected=player.inv.selected
+    if selected!="":
+      texture=Block.textures[selected]
+      screen.blit(texture,(0*constants.TILESIZE,32*constants.TILESIZE))
+    pygame.display.flip()
     sleep(DELAY)

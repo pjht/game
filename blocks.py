@@ -4,13 +4,14 @@ import lib.constants as constants
 from lib.gameregistry import GameRegistry
 from lib.block import Block
 
-def make_block(klass_name,name,clear=False):
+def make_block(klass_name,name,clear=False,drops=False):
   def blk_init():
     pass
   def init(self,x,y,screen):
     Block.__init__(self,x,y,screen)
     self.setTextureName(name)
     self.clear=clear
+    self.drops=drops
     self.unlocalisedName=name
   attr_table={
     "unlocalisedName":name,
@@ -19,13 +20,15 @@ def make_block(klass_name,name,clear=False):
   }
   klass=type(klass_name,(Block,),attr_table)
   GameRegistry.registerBlock(klass,name)
+  Block.registerTexture(name)
   glob=globals()
   glob[klass_name]=klass
   return klass
 
 make_block("BlockStone","stone")
-make_block("BlockTree","tree")
+make_block("BlockTree","tree",False,("wood",8))
 make_block("BlockGrass","grass",True)
+make_block("BlockWood","wood")
 
 class BlockDoor(Block):
   unlocalisedName="door"
@@ -34,10 +37,12 @@ class BlockDoor(Block):
   @classmethod
   def init(cls):
     GameRegistry.registerBlock(cls,cls.unlocalisedName)
+    Block.registerTexture(cls.unlocalisedName)
 
   def __init__(self,x,y,screen):
     Block.__init__(self,x,y,screen)
     self.setTextureName(BlockDoor.unlocalisedName)
+    self.unlocalisedName=BlockDoor.unlocalisedName
 
   def interact(self):
     self.clear=not self.clear

@@ -14,7 +14,7 @@ class Map(Group):
   def addTile(self,tname,x,y):
     klass=GameRegistry.block_classes[tname]
     tile=klass(x,y,self.screen)
-    super().add(tile)
+    self.add(tile)
 
   def generate(self):
     y=0

@@ -1,2 +1,2 @@
-from . import block,constants,gameregistry,map,character
-__all__=["block","gameregistry","map","character"]
+from . import block,constants,gameregistry,map,character,inventory
+__all__=["block","gameregistry","map","character","inventory"]

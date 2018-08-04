@@ -19,11 +19,11 @@ class Block(Sprite):
     self.tname=None
     self.clear=False
     self.unlocalisedName=""
-    self.customDraw=False
+    self.drops=False
 
   def draw(self):
     if self.tname==None:
-      raise Exception("No texture name for block. Did you forget to call setTextureName?")
+      raise Exception("No texture name for block. Did you forget to call setTextureName({})?".format(name))
     self.screen.blit(Block.background,(self.x*constants.TILESIZE,self.y*constants.TILESIZE))
     texture=self.getTexture()
     if texture==False:
@@ -32,8 +32,12 @@ class Block(Sprite):
 
   def setTextureName(self,name):
     if not name in Block.textures.keys():
-      Block.textures[name]=pygame.image.load(os.path.join("tiles","{}.jpeg".format(name)))
+      raise Exception("{} is not a valid texture. Did you forget to call registerTexture({})?".format(name,name))
     self.tname=name
+
+  @classmethod
+  def registerTexture(cls,name):
+    Block.textures[name]=pygame.image.load(os.path.join("tiles","{}.jpeg".format(name)))
 
   def interact(self):
     pass

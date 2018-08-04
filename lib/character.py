@@ -52,7 +52,7 @@ class Character(Sprite):
       self.x=old_x
     if self.x<0:
       self.x=old_x
-    if self.y>=constants.WINDHEIGHT:
+    if self.y>=(constants.WINDHEIGHT-(constants.EXTRAROWS*constants.TILESIZE)):
       self.y=old_y
     if self.y<0:
       self.y=old_y
