@@ -32,7 +32,6 @@ class Player(Character):
       return
     tile=self.map.tileAt(coords[0],coords[1])
     name=tile.unlocalisedName
-
     if name=="grass":
       to_place=self.inv.selected
       if to_place=="":
@@ -42,7 +41,7 @@ class Player(Character):
       self.map.addTile(to_place,coords[0],coords[1])
       self.inv.remove(to_place)
     else:
-      tile.interact()
+      tile.interact(self.inv)
 
   def attack(self):
     coords=self.facingTile()

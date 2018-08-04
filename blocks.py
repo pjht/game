@@ -44,7 +44,7 @@ class BlockDoor(Block):
     self.setTextureName(BlockDoor.unlocalisedName)
     self.unlocalisedName=BlockDoor.unlocalisedName
 
-  def interact(self):
+  def interact(self,inv):
     self.clear=not self.clear
     pygame.mixer.Sound("door.ogg").play().set_volume(0.2)
 
@@ -53,3 +53,35 @@ class BlockDoor(Block):
       return BlockDoor.openDoor
     else:
       return False
+
+class BlockWorkbench(Block):
+  unlocalisedName="workbench"
+
+  @classmethod
+  def init(cls):
+    GameRegistry.registerBlock(cls,cls.unlocalisedName)
+    Block.registerTexture(cls.unlocalisedName)
+
+  def __init__(self,x,y,screen):
+    Block.__init__(self,x,y,screen)
+    self.setTextureName(BlockWorkbench.unlocalisedName)
+    self.unlocalisedName=BlockWorkbench.unlocalisedName
+    self.tiles={}
+
+  def interact(self,inv):
+    selected=inv.selected
+    if selected!="":
+      inv.remove(selected,1)
+      if selected in self.tiles.keys():
+        self.tiles[selected]+=1
+      else:
+        self.tiles[selected]=1
+    else:
+      if self.tiles in GameRegistry.recipes.values():
+        out=""
+        for outp,reqs in GameRegistry.recipes.items():
+          if self.tiles==reqs:
+            out=outp
+            break
+        self.tiles={}
+        inv.addTile(out,1)

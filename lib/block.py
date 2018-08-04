@@ -39,7 +39,7 @@ class Block(Sprite):
   def registerTexture(cls,name):
     Block.textures[name]=pygame.image.load(os.path.join("tiles","{}.jpeg".format(name)))
 
-  def interact(self):
+  def interact(self,inv):
     pass
 
   def getTexture(self):
