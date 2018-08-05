@@ -4,12 +4,12 @@ import random
 import recipes
 import sys
 import select
-from lib.gameregistry import GameRegistry
+import blocks
 import lib.constants as constants
+from lib.gameregistry import GameRegistry
 from lib.map import Map
 from lib.character import Character
 from lib.block import Block
-from blocks import *
 from player import *
 from time import sleep
 DELAY=0.1
@@ -62,6 +62,12 @@ if __name__ == '__main__':
           player.inv.selNext()
         if event.key==pygame.K_e:
           inv=not inv
+        if event.key==pygame.K_i:
+          dy_blocks=blocks.dy_blocks
+          Block.textures={}
+          Block.init()
+          for klass,unName in dy_blocks.items():
+            Block.registerTexture(unName)
         if event.key in key_to_dir.keys():
           move=True
           dir=key_to_dir[event.key]
