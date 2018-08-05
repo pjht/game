@@ -45,3 +45,7 @@ class Inventory:
         ok_next=True
     if newsel!="":
       self.selected=newsel
+
+  def clear(self):
+    self.inv={}
+    self.selected=""
