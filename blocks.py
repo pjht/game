@@ -83,3 +83,44 @@ class BlockWorkbench(Block):
             break
         inv.addTile(out,1)
         self.inv.clear()
+
+class BlockFurnace(Block):
+  unlocalisedName="furnace"
+  frames=[]
+
+  @classmethod
+  def init(cls):
+    GameRegistry.registerBlock(cls,cls.unlocalisedName)
+    Block.registerTexture(cls.unlocalisedName)
+    for i in range(3):
+      path=os.path.join("animation",cls.unlocalisedName,"{}.png".format(i))
+      img=pygame.image.load(path)
+      cls.frames.append(img)
+
+  def __init__(self,x,y,screen):
+    Block.__init__(self,x,y,screen)
+    self.setTextureName(BlockFurnace.unlocalisedName)
+    self.unlocalisedName=BlockFurnace.unlocalisedName
+    self.frameno=0
+    self.forward=True
+    self.burn=False
+
+  def interact(self,inv):
+    self.burn=not self.burn
+
+  def getTexture(self):
+    if self.burn:
+      img=BlockFurnace.frames[self.frameno]
+      if self.forward:
+        self.frameno+=1
+        if self.frameno>2:
+          self.frameno=1
+          self.forward=False
+      else:
+        self.frameno-=1
+        if self.frameno<0:
+          self.frameno=1
+          self.forward=True
+      return img
+    else:
+      return False
