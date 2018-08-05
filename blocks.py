@@ -3,6 +3,7 @@ import os
 import lib.constants as constants
 from lib.gameregistry import GameRegistry
 from lib.block import Block
+from lib.inventory import Inventory
 
 def make_block(klass_name,name,clear=False,drops=False):
   def blk_init():
@@ -66,22 +67,19 @@ class BlockWorkbench(Block):
     Block.__init__(self,x,y,screen)
     self.setTextureName(BlockWorkbench.unlocalisedName)
     self.unlocalisedName=BlockWorkbench.unlocalisedName
-    self.tiles={}
+    self.inv=Inventory()
 
   def interact(self,inv):
     selected=inv.selected
     if selected!="":
-      inv.remove(selected,1)
-      if selected in self.tiles.keys():
-        self.tiles[selected]+=1
-      else:
-        self.tiles[selected]=1
+      inv.remove(selected)
+      self.inv.addTile(selected,1)
     else:
-      if self.tiles in GameRegistry.recipes.values():
+      if self.inv.inv in GameRegistry.recipes.values():
         out=""
         for outp,reqs in GameRegistry.recipes.items():
-          if self.tiles==reqs:
+          if self.inv.inv==reqs:
             out=outp
             break
-        self.tiles={}
         inv.addTile(out,1)
+        self.inv.clear()
