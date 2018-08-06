@@ -4,7 +4,7 @@ import os
 from . import constants
 class Block(Sprite):
   textures={}
-  background=pygame.image.load(os.path.join("tiles","{}.jpeg".format(constants.BACKGROUND)))
+  background=pygame.image.load(os.path.join("tiles","{}.png".format(constants.BACKGROUND)))
   @classmethod
   def init(cls):
     subclasses=cls.__subclasses__()
@@ -37,7 +37,7 @@ class Block(Sprite):
 
   @classmethod
   def registerTexture(cls,name):
-    Block.textures[name]=pygame.image.load(os.path.join("tiles","{}.jpeg".format(name)))
+    Block.textures[name]=pygame.image.load(os.path.join("tiles","{}.png".format(name)))
 
   def interact(self,inv):
     pass

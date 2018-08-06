@@ -38,10 +38,9 @@ make_block("BlockCoal","coal")
 GameRegistry.registerFuel("coal",8)
 make_block("BlockIron","iron")
 
-
 class BlockDoor(Block):
   unlocalisedName="door"
-  openDoor=pygame.image.load(os.path.join("tiles","door_open.jpeg"))
+  openDoor=pygame.image.load(os.path.join("tiles","door_open.png"))
 
   @classmethod
   def init(cls):
