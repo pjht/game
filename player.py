@@ -2,9 +2,10 @@ from lib.character import Character
 import lib.constants as constants
 from lib.inventory import Inventory
 class Player(Character):
-  def __init__(self,x,y,map,screen,*groups):
-    super().__init__(x,y,"player",map,screen,*groups)
+  def __init__(self,x,y,map,screen,uname,type,*groups):
+    super().__init__(x,y,type,map,screen,*groups)
     self.inv=Inventory()
+    self.uname=uname
 
   def facingTile(self):
     x=self.x/constants.TILESIZE

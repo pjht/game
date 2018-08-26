@@ -19,7 +19,8 @@ recipes.init()
 pygame.display.set_caption("game")
 screen=pygame.display.set_mode((constants.WINDWIDTH,constants.WINDHEIGHT))
 map=Map(screen)
-player=Player(0,0,map,screen)
+
+player=Player(0,0,map,screen,"PJHT","player")
 player.inv.addTile("workbench",1)
 if __name__ == '__main__':
   running=True

@@ -34,10 +34,11 @@ make_block("BlockStone","stone")
 make_block("BlockTree","tree",False,("wood",8))
 make_block("BlockGrass","grass",True)
 make_block("BlockWood","wood")
-make_block("BlockCoal","coal")
+make_block("BlockCoal","coal_ore")
 GameRegistry.registerFuel("coal",8)
-make_block("BlockIron","iron")
-
+make_block("BlockIron","iron_ore")
+make_block("ItemIronIngot","iron_ingot",False)
+#make_block("ItemCoal","coal",False)
 class BlockDoor(Block):
   unlocalisedName="door"
   openDoor=pygame.image.load(os.path.join("tiles","door_open.png"))
