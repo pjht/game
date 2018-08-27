@@ -4,7 +4,6 @@ import lib.constants as constants
 from lib.gameregistry import GameRegistry
 from lib.block import Block
 from lib.inventory import Inventory
-
 dy_blocks={}
 
 def make_block(klass_name,name,clear=False,drops=False):
@@ -35,7 +34,7 @@ make_block("BlockTree","tree",False,("wood",8))
 make_block("BlockGrass","grass",True)
 make_block("BlockWood","wood")
 make_block("BlockCoal","coal_ore")
-GameRegistry.registerFuel("coal",8)
+GameRegistry.registerFuel("coal_ore",8)
 make_block("BlockIron","iron_ore")
 make_block("ItemIronIngot","iron_ingot",False)
 #make_block("ItemCoal","coal",False)
@@ -62,6 +61,12 @@ class BlockDoor(Block):
       return BlockDoor.openDoor
     else:
       return False
+
+  def interactData(self):
+    return {"clear":self.clear}
+
+  def loadData(self,data):
+    self.clear=data["clear"]
 
 class BlockWorkbench(Block):
   unlocalisedName="workbench"
@@ -92,6 +97,12 @@ class BlockWorkbench(Block):
         inv.addTile(out,1)
         self.inv.clear()
 
+  def interactData(self):
+    return {"inv":self.inv}
+
+  def loadData(self,data):
+    self.inv=data["inv"]
+
 class BlockFurnace(Block):
   unlocalisedName="furnace"
   frames=[]
@@ -120,6 +131,8 @@ class BlockFurnace(Block):
     self.fuel=""
     self.fuel_amount=0
     self.fuel_num=0
+    self.originator=True
+
   def interact(self,inv):
     sel=inv.selected
     if sel!="":
@@ -149,11 +162,11 @@ class BlockFurnace(Block):
         inv.addTile(self.outp,self.outp_amount)
         self.outp=""
         self.outp_amount=0
+    self.originator=True
 
   def getTexture(self):
     if self.burn:
       self.count+=1
-      print(self.count)
       if self.count==10:
         self.update()
         self.count=0
@@ -171,14 +184,15 @@ class BlockFurnace(Block):
       return img
     else:
       return False
+    self.mp_upd=True
 
   def update(self):
     self.fuel_num-=1
-    if self.fuel_num==0:
-      if self.inp=="":
-        self.burn=False
-        return
-      if self.fuel_amount==0:
+    if self.inp=="":
+      self.burn=False
+      return
+    if self.fuel_num<=0:
+      if self.fuel_amount<=0:
         self.burn=False
         self.fuel=""
         return
@@ -186,12 +200,41 @@ class BlockFurnace(Block):
         self.fuel_amount-=1
         self.fuel_num=GameRegistry.fuels[self.fuel]
     if self.inp!="":
-      print("CRAFT {}".format(self.inp))
       if self.inp in GameRegistry.smelting:
-        print("GA")
         self.inp_amount-=1
         self.outp=GameRegistry.smelting[self.inp]
         self.outp_amount+=1
-        if self.inp_amount==0:
+        if self.inp_amount<=0:
           self.inp=""
-        print("{} {} in output".format(self.outp_amount,self.outp))
+    if self.originator:
+      self.mp_upd=True
+
+  def loadData(self,data):
+    self.frameno=data["frameno"]
+    self.forward=data["forward"]
+    self.burn=data["burn"]
+    self.count=data["count"]
+    self.inp=data["inp"]
+    self.inp_amount=data["inp_amount"]
+    self.outp=data["outp"]
+    self.outp_amount=data["outp_amount"]
+    self.fuel=data["fuel"]
+    self.fuel_amount=data["fuel_amount"]
+    self.fuel_num=data["fuel_num"]
+    self.originator=False
+
+  def interactData(self):
+    self.mp_upd=False
+    return {
+      "frameno":self.frameno,
+      "forward":self.forward,
+      "burn":self.burn,
+      "count":self.count,
+      "inp":self.inp,
+      "inp_amount":self.inp_amount,
+      "outp":self.outp,
+      "outp_amount":self.outp_amount,
+      "fuel":self.fuel,
+      "fuel_amount":self.fuel_amount,
+      "fuel_num":self.fuel_num
+    }

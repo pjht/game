@@ -27,6 +27,7 @@ class Player(Character):
     if y<0:
       return False
     return (x,y)
+    
   def interact(self):
     coords=self.facingTile()
     if coords==False:
