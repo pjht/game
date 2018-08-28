@@ -8,6 +8,9 @@ import blocks
 import socket
 import _thread
 import pickle
+import signal
+import glob
+import os.path
 import lib.constants as constants
 from lib.gameregistry import GameRegistry
 from lib.map import Map
@@ -152,15 +155,58 @@ def on_new_client(sock):
           map_changes[uid]=[]
     clientsocket.close()
 
+def handle_cmds():
+  while True:
+    if select.select([sys.stdin],[],[],0.0)[0]:
+      cmd=input()
+      cmd=cmd.split()
+      if len(cmd)>0:
+        if cmd[0]=="stop":
+          s.close()
+          f=open("map_{}.pkl".format(map_name),"wb")
+          pickle.dump(map,f)
+          f.close()
+          exit(1)
+
+def exit_cleanup(signal,frame):
+  s.close()
+  f=open("map_{}.pkl".format(map_name),"wb")
+  pickle.dump(map,f)
+  f.close()
+
 Block.init()
-map=Map(None)
+files=glob.glob("map_*.pkl")
+if len(files)==0:
+  new="y"
+else:
+  new=input("New world?").lower()
+if new=="n" or new=="no":
+  i=1
+  map_map=[]
+  for name in files:
+    name=name.split("_")
+    name.pop(0)
+    name="_".join(name)
+    name,_=os.path.splitext(name)
+    print("{}. {}".format(i,name))
+    map_map.append(name)
+    i+=1
+  map_name=map_map[int(input("Which world?"))-1]
+  f=open("map_{}.pkl".format(map_name),"rb")
+  map=pickle.load(f)
+  f.close()
+else:
+  map_name=input("World name:")
+  map=Map(None)
+
 s=socket.socket()
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 host="localhost"
 port=2000
 s.bind((host, port))
 s.listen(5)
+_thread.start_new_thread(handle_cmds,())
+signal.signal(signal.SIGINT, exit_cleanup)
 while True:
    c,addr=s.accept()
    _thread.start_new_thread(on_new_client,(c,))
-s.close()
