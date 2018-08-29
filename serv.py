@@ -140,6 +140,8 @@ def on_new_client(sock):
           y=int(recv_str(sock))
           data=recvall(sock)
           block_data=pickle.loads(data)
+          tile=map.tileAt(x,y)
+          tile.loadData(block_data)
           for uid,changes in map_changes.copy().items():
             if ch_uid!=uid:
               map_changes[uid].append({"type":"interact","x":x,"y":y,"block_data":block_data})
