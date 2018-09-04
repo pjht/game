@@ -21,14 +21,15 @@ class Block(Sprite):
     self.unlocalisedName=""
     self.drops=False
     self.mp_upd=False
-  def draw(self):
+
+  def draw(self,x,y):
     if self.tname==None:
       raise Exception("No texture name for block. Did you forget to call setTextureName()?".format())
-    self.screen.blit(Block.background,(self.x*constants.TILESIZE,self.y*constants.TILESIZE))
+    self.screen.blit(Block.background,(x*constants.TILESIZE,y*constants.TILESIZE))
     texture=self.getTexture()
     if texture==False:
       texture=Block.textures[self.tname]
-    self.screen.blit(texture,(self.x*constants.TILESIZE,self.y*constants.TILESIZE))
+    self.screen.blit(texture,(x*constants.TILESIZE,y*constants.TILESIZE))
 
   def setTextureName(self,name):
     if not name in Block.textures.keys():

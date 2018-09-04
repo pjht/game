@@ -1,10 +1,14 @@
 import pygame
+import sys
+def my_load(path):
+  return None
+mod=sys.modules["pygame.image"]
+mod.load=my_load
+sys.modules["pygame.image"]=mod
 import os
 import random
 import recipes
-import sys
 import select
-import blocks
 import socket
 import _thread
 import pickle
@@ -16,13 +20,13 @@ from lib.gameregistry import GameRegistry
 from lib.map import Map
 from lib.character import Character
 from lib.block import Block
-from player import *
+from lib.player import Player
 from time import sleep
 uid_map={}
 pos_map={}
 map_changes={}
 next_uid=0
-
+import blocks
 def recv_str(sock):
   str=""
   ch=""
@@ -165,19 +169,19 @@ def handle_cmds():
       if len(cmd)>0:
         if cmd[0]=="stop":
           s.close()
-          f=open("map_{}.pkl".format(map_name),"wb")
+          f=open("worlds/map_{}.pkl".format(map_name),"wb")
           pickle.dump(map,f)
           f.close()
           exit(1)
 
 def exit_cleanup(signal,frame):
   s.close()
-  f=open("map_{}.pkl".format(map_name),"wb")
+  f=open("worlds/map_{}.pkl".format(map_name),"wb")
   pickle.dump(map,f)
   f.close()
 
 Block.init()
-files=glob.glob("map_*.pkl")
+files=glob.glob("worlds/map_*.pkl")
 if len(files)==0:
   new="y"
 else:
@@ -194,7 +198,7 @@ if new=="n" or new=="no":
     map_map.append(name)
     i+=1
   map_name=map_map[int(input("Which world?"))-1]
-  f=open("map_{}.pkl".format(map_name),"rb")
+  f=open("worlds/map_{}.pkl".format(map_name),"rb")
   map=pickle.load(f)
   f.close()
 else:

@@ -7,14 +7,13 @@ import select
 import blocks
 import socket
 import pickle
-import math
 import lib.constants as constants
 from lib.gameregistry import GameRegistry
 from lib.map import Map
 from lib.character import Character
 from lib.block import Block
-from player import *
-from player_img import *
+from lib.player import Player
+from lib.player_img import PlayerImg
 from time import sleep
 
 def recv_str(sock,print_str=True):
@@ -70,16 +69,12 @@ data=recvall(sock)
 map=pickle.loads(data)
 # The server's generated map does not have a screen. We fix that here.
 map.screen=screen
-for s in map.sprites():
-  s.screen=screen
-send_str(sock,"GET_POS_FOR_UID")
-send_str(sock,str(my_uid))
-x=int(recv_str(sock))*constants.TILESIZE
-y=int(recv_str(sock))*constants.TILESIZE
-fac=recv_str(sock)
-player=Player(x,y,map,screen,UNAME,"player_local")
+for row in map.tiles:
+  for tile in row:
+    tile.screen=screen
+
+player=Player(0,0,map,screen,UNAME,"player_local")
 player.inv.addTile("workbench",1)
-player.dir=fac
 others={}
 running=True
 move=False
@@ -100,8 +95,8 @@ while running:
     if uname!=UNAME:
       send_str(sock,"GET_POS_FOR_UID")
       send_str(sock,uid)
-      x=int(recv_str(sock))*constants.TILESIZE
-      y=int(recv_str(sock))*constants.TILESIZE
+      x=int(recv_str(sock))
+      y=int(recv_str(sock))
       fac=recv_str(sock)
       if uname in others:
         others[uname].x=x
@@ -142,15 +137,16 @@ while running:
       block_data=change["block_data"]
       tile=map.tileAt(x,y)
       tile.loadData(block_data)
-  for s in map.sprites():
-    if s.mp_upd:
-      data=s.interactData()
-      send_str(sock,"INTERACT_BLOCK_AT")
-      send_str(sock,str(my_uid))
-      send_str(sock,str(math.floor(s.x)))
-      send_str(sock,str(math.floor(s.y)))
-      data_string=pickle.dumps(data)
-      sock.send(data_string)
+  for row in map.tiles:
+    for s in row:
+      if s.mp_upd:
+        data=s.interactData()
+        send_str(sock,"INTERACT_BLOCK_AT")
+        send_str(sock,str(my_uid))
+        send_str(sock,str(s.x))
+        send_str(sock,str(s.y))
+        data_string=pickle.dumps(data)
+        sock.send(data_string)
   if select.select([sys.stdin],[],[],0.0)[0]:
     cmd=input()
     cmd=cmd.split()
@@ -178,8 +174,8 @@ while running:
             if to_place!="":
               send_str(sock,"PLACE_BLOCK_AT")
               send_str(sock,str(my_uid))
-              send_str(sock,str(math.floor(coords[0])))
-              send_str(sock,str(math.floor(coords[1])))
+              send_str(sock,str(coords[0]))
+              send_str(sock,str(coords[1]))
               send_str(sock,str(to_place))
               player.interact()
           else:
@@ -189,8 +185,8 @@ while running:
             if data!=None:
               send_str(sock,"INTERACT_BLOCK_AT")
               send_str(sock,str(my_uid))
-              send_str(sock,str(math.floor(coords[0])))
-              send_str(sock,str(math.floor(coords[1])))
+              send_str(sock,str(coords[0]))
+              send_str(sock,str(coords[1]))
               data_string=pickle.dumps(data)
               sock.send(data_string)
       if event.key==pygame.K_SLASH:
@@ -201,8 +197,8 @@ while running:
           y=facing[1]
           send_str(sock,"BREAK_BLOCK_AT")
           send_str(sock,str(my_uid))
-          send_str(sock,str(math.floor(x)))
-          send_str(sock,str(math.floor(y)))
+          send_str(sock,str(x))
+          send_str(sock,str(y))
       if event.key==pygame.K_j:
         player.inv.selPrev()
       if event.key==pygame.K_k:
@@ -227,8 +223,8 @@ while running:
     player.move(dir)
     send_str(sock,"SET_POS_FOR_UID")
     send_str(sock,str(my_uid))
-    send_str(sock,str(math.floor(player.x/constants.TILESIZE)))
-    send_str(sock,str(math.floor(player.y/constants.TILESIZE)))
+    send_str(sock,str(player.x))
+    send_str(sock,str(player.y))
     send_str(sock,player.dir)
   if inv:
     screen.fill([255,255,255])
@@ -243,14 +239,30 @@ while running:
     pygame.display.flip()
   else:
     screen.fill([0,0,0])
-    map.draw()
+    map.draw(player.x,player.y)
     player.draw()
     selected=player.inv.selected
     if selected!="":
       texture=Block.textures[selected]
-      screen.blit(texture,(0*constants.TILESIZE,32*constants.TILESIZE))
-    for uname,other in others.items():
-      other.draw()
+      screen.blit(texture,(0*constants.TILESIZE,constants.PORTHEIGHT*constants.TILESIZE))
+    topleftx=player.x-16
+    toplefty=player.y-16
+    x=topleftx
+    y=toplefty
+    while True:
+      other=None
+      for uname,o in others.items():
+        if o.x==x and o.y==y:
+          other=o
+          break
+      if other:
+        other.draw(x-topleftx,y-toplefty)
+      x+=1
+      if x==topleftx+constants.PORTWIDTH:
+        x=topleftx
+        y+=1
+        if y==toplefty+constants.PORTHEIGHT:
+          break
     pygame.display.flip()
     sleep(0.1)
 send_str(sock,"CLOSE")

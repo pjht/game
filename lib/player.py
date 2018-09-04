@@ -8,8 +8,8 @@ class Player(Character):
     self.uname=uname
 
   def facingTile(self):
-    x=self.x/constants.TILESIZE
-    y=self.y/constants.TILESIZE
+    x=self.x
+    y=self.y
     if self.dir=="up":
       y-=1
     elif self.dir=="down":
@@ -27,7 +27,7 @@ class Player(Character):
     if y<0:
       return False
     return (x,y)
-    
+
   def interact(self):
     coords=self.facingTile()
     if coords==False:
@@ -61,3 +61,12 @@ class Player(Character):
       drop=tile.drops[0]
       amount=tile.drops[1]
       self.inv.addTile(drop,amount)
+
+  def draw(self):
+    oldx=self.x
+    oldy=self.y
+    self.x=16
+    self.y=16
+    super().draw()
+    self.x=oldx
+    self.y=oldy

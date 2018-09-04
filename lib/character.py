@@ -30,7 +30,7 @@ class Character(Sprite):
 
   def draw(self):
     img=self.frames[self.dir][self.frame]
-    self.screen.blit(img,(self.x,self.y))
+    self.screen.blit(img,(self.x*constants.TILESIZE,self.y*constants.TILESIZE))
     pygame.display.flip()
 
   def move(self,dir):
@@ -38,25 +38,25 @@ class Character(Sprite):
     old_y=self.y
     self.dir=dir
     if dir=="up":
-      self.y-=constants.PLAYER_MOVE
+      self.y-=1
     elif dir=="down":
-      self.y+=constants.PLAYER_MOVE
+      self.y+=1
     elif dir=="left":
-      self.x-=constants.PLAYER_MOVE
+      self.x-=1
     elif dir=="right":
-      self.x+=constants.PLAYER_MOVE
+      self.x+=1
     self.frame+=1
     if self.frame>2:
       self.frame=0
-    if self.x>=constants.WINDWIDTH:
+    if self.x>=constants.MAPWIDTH:
       self.x=old_x
     if self.x<0:
       self.x=old_x
-    if self.y>=(constants.WINDHEIGHT-(constants.EXTRAROWS*constants.TILESIZE)):
+    if self.y>=constants.MAPHEIGHT:
       self.y=old_y
     if self.y<0:
       self.y=old_y
-    tile=self.map.tileAt(self.x/constants.TILESIZE,self.y/constants.TILESIZE)
+    tile=self.map.tileAt(self.x,self.y)
     if not tile.clear:
       self.x=old_x
       self.y=old_y

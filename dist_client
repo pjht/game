@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+rm -rf client
+mkdir client
+mkdir client/code
+cp -r lib sprites tiles animation blocks.py recipes.py client/code
+cp client.py client/code
+echo "#!/usr/bin/env bash
+cd code
+python3 client.py
+cd .." > client/run
+chmod u+x client/run
