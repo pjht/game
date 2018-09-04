@@ -38,8 +38,7 @@ class Player(Character):
       to_place=self.inv.selected
       if to_place=="":
         return
-      tile=self.map.tileAt(coords[0],coords[1])
-      self.map.remove(tile)
+      self.map.tiles[coords[1]][coords[0]]=None
       self.map.addTile(to_place,coords[0],coords[1])
       self.inv.remove(to_place)
     else:
@@ -53,7 +52,7 @@ class Player(Character):
     name=tile.unlocalisedName
     if name=="grass":
       return
-    self.map.remove(tile)
+    self.map.tiles[coords[1]][coords[0]]=None
     self.map.addTile("grass",coords[0],coords[1])
     if tile.drops==False:
       self.inv.addTile(name,1)

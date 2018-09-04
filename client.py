@@ -73,7 +73,13 @@ for row in map.tiles:
   for tile in row:
     tile.screen=screen
 
-player=Player(0,0,map,screen,UNAME,"player_local")
+send_str(sock,"GET_POS_FOR_UID")
+send_str(sock,str(my_uid))
+x=int(recv_str(sock))
+y=int(recv_str(sock))
+fac=recv_str(sock)
+player=Player(x,y,map,screen,UNAME,"player_local")
+player.dir=fac
 player.inv.addTile("workbench",1)
 others={}
 running=True
@@ -122,14 +128,13 @@ while running:
       name=tile.unlocalisedName
       if name=="grass":
         continue
-      map.remove(tile)
+      map.tiles[y][x]=None
       map.addTile("grass",x,y)
     if change["type"]=="place":
       x=change["x"]
       y=change["y"]
       block=change["block"]
-      tile=map.tileAt(x,y)
-      map.remove(tile)
+      map.tiles[y][x]=None
       map.addTile(block,x,y)
     if change["type"]=="interact":
       x=change["x"]
