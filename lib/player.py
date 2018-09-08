@@ -64,8 +64,8 @@ class Player(Character):
   def draw(self):
     oldx=self.x
     oldy=self.y
-    self.x=16
-    self.y=16
+    self.x=constants.CENTERX
+    self.y=constants.CENTERY
     super().draw()
     self.x=oldx
     self.y=oldy

@@ -250,8 +250,8 @@ while running:
     if selected!="":
       texture=Block.textures[selected]
       screen.blit(texture,(0*constants.TILESIZE,constants.PORTHEIGHT*constants.TILESIZE))
-    topleftx=player.x-16
-    toplefty=player.y-16
+    topleftx=player.x-constants.CENTERX
+    toplefty=player.y-constants.CENTERY
     x=topleftx
     y=toplefty
     while True:

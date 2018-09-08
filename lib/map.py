@@ -43,8 +43,8 @@ class Map:
       y+=1
 
   def draw(self,centerx,centery):
-    topleftx=centerx-16
-    toplefty=centery-16
+    topleftx=centerx-constants.CENTERX
+    toplefty=centery-constants.CENTERY
     x=topleftx
     y=toplefty
     while True:
