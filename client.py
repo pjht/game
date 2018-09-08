@@ -69,8 +69,7 @@ data=recvall(sock)
 map=pickle.loads(data)
 # The server's generated map does not have a screen. We fix that here.
 map.screen=screen
-for row in map.tiles:
-  for tile in row:
+for tile in map.tiles.values():
     tile.screen=screen
 
 send_str(sock,"GET_POS_FOR_UID")
@@ -128,13 +127,13 @@ while running:
       name=tile.unlocalisedName
       if name=="grass":
         continue
-      map.tiles[y][x]=None
+      map.tiles[(x,y)]=None
       map.addTile("grass",x,y)
     if change["type"]=="place":
       x=change["x"]
       y=change["y"]
       block=change["block"]
-      map.tiles[y][x]=None
+      map.tiles[(x,y)]=None
       map.addTile(block,x,y)
     if change["type"]=="interact":
       x=change["x"]
@@ -142,8 +141,7 @@ while running:
       block_data=change["block_data"]
       tile=map.tileAt(x,y)
       tile.loadData(block_data)
-  for row in map.tiles:
-    for s in row:
+  for s in map.tiles.values():
       if s.mp_upd:
         data=s.interactData()
         send_str(sock,"INTERACT_BLOCK_AT")
