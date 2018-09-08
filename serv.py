@@ -117,7 +117,7 @@ def on_new_client(sock):
           name=tile.unlocalisedName
           if name=="grass":
             continue
-          map.tiles[y][x]=None
+          map.tiles[(x,y)]=None
           map.addTile("grass",x,y)
         elif msg=="PLACE_BLOCK_AT":
           ch_uid=int(recv_str(sock))
@@ -132,7 +132,7 @@ def on_new_client(sock):
             if ch_uid!=uid:
               map_changes[uid].append({"type":"place","x":x,"y":y,"block":block})
           tile=map.tileAt(x,y)
-          map.tiles[y][x]=None
+          map.tiles[(x,y)]=None
           map.addTile(block,x,y)
         elif msg=="INTERACT_BLOCK_AT":
           ch_uid=int(recv_str(sock))

@@ -6,11 +6,17 @@ from . import constants
 from .gameregistry import GameRegistry
 from .block import Block
 class Map:
-  def __init__(self,screen):
+  def __init__(self,screen,sock=None,uid=None):
     super().__init__()
     self.tiles={}
     self.screen=screen
+    self.sock=sock
+    self.uid=uid
     self.generate()
+
+  def send_str(self,sock,str):
+    # print(str)
+    sock.send((str+"\n").encode("utf-8"))
 
   def addTile(self,tname,x,y):
     klass=GameRegistry.block_classes[tname]
@@ -55,4 +61,23 @@ class Map:
     try:
       return self.tiles[(x,y)]
     except KeyError as e:
-      return None
+      name=""
+      num=random.randint(0,101)
+      if num<5:
+        num=random.randint(0,101)
+        if num<50:
+          name="tree"
+          self.addTile("tree",x,y)
+        else:
+          name="stone"
+          self.addTile("stone",x,y)
+      else:
+        name=constants.BACKGROUND
+        self.addTile(constants.BACKGROUND,x,y)
+      if self.sock:
+        self.send_str(self.sock,"PLACE_BLOCK_AT")
+        self.send_str(self.sock,str(self.uid))
+        self.send_str(self.sock,str(x))
+        self.send_str(self.sock,str(y))
+        self.send_str(self.sock,str(name))
+      return self.tiles[(x,y)]

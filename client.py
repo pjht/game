@@ -67,8 +67,10 @@ uid_map={}
 send_str(sock,"GET_MAP")
 data=recvall(sock)
 map=pickle.loads(data)
-# The server's generated map does not have a screen. We fix that here.
+# The server's generated map does not have a screen, uid or socket. We fix that here.
 map.screen=screen
+map.sock=sock
+map.uid=my_uid
 for tile in map.tiles.values():
     tile.screen=screen
 

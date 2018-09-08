@@ -48,14 +48,6 @@ class Character(Sprite):
     self.frame+=1
     if self.frame>2:
       self.frame=0
-    if self.x>=constants.MAPWIDTH:
-      self.x=old_x
-    if self.x<0:
-      self.x=old_x
-    if self.y>=constants.MAPHEIGHT:
-      self.y=old_y
-    if self.y<0:
-      self.y=old_y
     tile=self.map.tileAt(self.x,self.y)
     if not tile.clear:
       self.x=old_x
