@@ -79,8 +79,15 @@ def on_new_client(sock):
           next_uid+=1
         elif msg=="GET_UID_MAP":
           send_hash(sock,uid_map)
-        elif msg=="GET_MAP":
-          data_string=pickle.dumps(map)
+        elif msg=="BLOCK_AT_POS":
+          x=int(recv_str(sock))
+          y=int(recv_str(sock))
+          block=None
+          try:
+            block=map.tiles[(x,y)]
+          except KeyError as e:
+            pass
+          data_string=pickle.dumps(block)
           sock.send(data_string)
         elif msg=="GET_POS_FOR_UID":
           uid=recv_str(sock)
@@ -131,7 +138,6 @@ def on_new_client(sock):
           for uid,changes in map_changes.copy().items():
             if ch_uid!=uid:
               map_changes[uid].append({"type":"place","x":x,"y":y,"block":block})
-          tile=map.tileAt(x,y)
           map.tiles[(x,y)]=None
           map.addTile(block,x,y)
         elif msg=="INTERACT_BLOCK_AT":

@@ -64,15 +64,8 @@ send_str(sock,"ADD_USR")
 send_str(sock,UNAME)
 my_uid=int(recv_str(sock))
 uid_map={}
-send_str(sock,"GET_MAP")
-data=recvall(sock)
-map=pickle.loads(data)
-# The server's generated map does not have a screen, uid or socket. We fix that here.
-map.screen=screen
-map.sock=sock
-map.uid=my_uid
-for tile in map.tiles.values():
-    tile.screen=screen
+map=Map(screen,sock,my_uid)
+map.tiles={}
 
 send_str(sock,"GET_POS_FOR_UID")
 send_str(sock,str(my_uid))
