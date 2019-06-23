@@ -14,6 +14,7 @@ from lib.character import Character
 from lib.block import Block
 from lib.player import Player
 from lib.player_img import PlayerImg
+from showstep import show_step
 from time import sleep
 
 def recv_str(sock,print_str=True):
@@ -52,6 +53,7 @@ def recvall(sock):
       break
   return data
 
+
 UNAME=input("UNAME:")
 pygame.init()
 Block.init()
@@ -59,22 +61,33 @@ recipes.init()
 pygame.display.set_caption(UNAME)
 screen=pygame.display.set_mode((constants.WINDWIDTH,constants.WINDHEIGHT))
 sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+show_step("Connecting to game server")
 sock.connect(("localhost",2000))
+show_step("Adding user to server (Sending ADD_USR {})".format(UNAME))
 send_str(sock,"ADD_USR")
 send_str(sock,UNAME)
+show_step("Recieving UID")
 my_uid=int(recv_str(sock))
+show_step("Got UID {}".format(my_uid))
+show_step("Initializing UID map")
 uid_map={}
+show_step("Initializing level map")
 map=Map(screen,sock,my_uid)
 map.tiles={}
 
+show_step("Retreiving player position and facing (Sending GET_POS_FOR_UID {})".format(my_uid))
 send_str(sock,"GET_POS_FOR_UID")
 send_str(sock,str(my_uid))
 x=int(recv_str(sock))
 y=int(recv_str(sock))
 fac=recv_str(sock)
+show_step("Got position ({},{}), facing {}".format(x,y,fac))
+show_step("Initializing player")
 player=Player(x,y,map,screen,UNAME,"player_local")
 player.dir=fac
+show_step("Adding workbench to inventory")
 player.inv.addTile("workbench",1)
+show_step("Initializing misc game variables")
 others={}
 running=True
 move=False
