@@ -16,6 +16,9 @@ from lib.player import Player
 from lib.player_img import PlayerImg
 from showstep import show_step
 from time import sleep
+import pprint
+
+pp=pprint.PrettyPrinter(indent=2)
 
 def recv_str(sock,print_str=True):
   str=""
@@ -25,12 +28,12 @@ def recv_str(sock,print_str=True):
     if ch=="\n":
       break
     str+=ch
-  # if print_str:
-  #   print(str)
+  if print_str:
+    print("Got string: "+str)
   return str
 
 def send_str(sock,str):
-  # print(str)
+  print("Sending string: "+str)
   sock.send((str+"\n").encode("utf-8"))
 
 def recv_hash(sock):
@@ -40,7 +43,7 @@ def recv_hash(sock):
     key=recv_str(sock,False)
     val=recv_str(sock,False)
     hash[key]=val
-    # print(hash)
+  print("Got hash: "+pp.pformat(hash))
   return hash
 
 def recvall(sock):
@@ -51,6 +54,7 @@ def recvall(sock):
     data+=part
     if len(part)<BUFF_SIZE:
       break
+  print("Got data: "+pp.pformat(pickle.loads(data)))
   return data
 
 
@@ -100,6 +104,7 @@ key_to_dir={
   pygame.K_RIGHT:"right"
 }
 while running:
+  # show_step("Updating game and drawing frame")
   send_str(sock,"GET_UID_MAP")
   uid_map=recv_hash(sock)
   # Will be filled with usernames of connected players
@@ -161,16 +166,17 @@ while running:
   if select.select([sys.stdin],[],[],0.0)[0]:
     cmd=input()
     cmd=cmd.split()
-    if cmd[0]=="give":
-      if len(cmd)==2:
-        item=cmd[1]
-        player.inv.addTile(item,1)
-      elif len(cmd)==3:
-        item=cmd[1]
-        count=int(cmd[2])
-        player.inv.addTile(item,count)
-      else:
-        print("give <item> [count]")
+    if len(cmd)==1:
+      if cmd[0]=="give":
+        if len(cmd)==2:
+          item=cmd[1]
+          player.inv.addTile(item,1)
+        elif len(cmd)==3:
+          item=cmd[1]
+          count=int(cmd[2])
+          player.inv.addTile(item,count)
+        else:
+          print("give <item> [count]")
   for event in pygame.event.get():
     if event.type==pygame.QUIT:
       running=False

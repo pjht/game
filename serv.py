@@ -27,6 +27,10 @@ pos_map={}
 map_changes={}
 next_uid=0
 import blocks
+import pprint
+
+pp=pprint.PrettyPrinter(indent=2)
+
 def recv_str(sock):
   str=""
   ch=""
@@ -35,16 +39,20 @@ def recv_str(sock):
     if ch=="\n":
       break
     str+=ch
+  print("Got string: "+str)
   return str
 
-def send_str(sock,str):
+def send_str(sock,str,print_str=True):
+  if print_str:
+    print("Sending string: "+str)
   sock.send((str+"\n").encode("utf-8"))
 
 def send_hash(sock,hash):
-  send_str(sock,str(len(hash)))
+  print("Sending hash: "+pp.pformat(hash))
+  send_str(sock,str(len(hash)),False)
   for key,val in hash.items():
-    send_str(sock,str(key))
-    send_str(sock,str(val))
+    send_str(sock,str(key),False)
+    send_str(sock,str(val),False)
 
 def recvall(sock):
   BUFF_SIZE=4096
@@ -54,6 +62,7 @@ def recvall(sock):
     data+=part
     if len(part)<BUFF_SIZE:
       break
+  print("Got data: "+pp.pformat(pickle.loads(data)))
   return data
 
 def on_new_client(sock):

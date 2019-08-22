@@ -3,7 +3,7 @@ rm -rf serv
 mkdir serv
 mkdir serv/code
 mkdir serv/worlds
-cp -r lib blocks.py serv/code
+cp -r lib blocks.py recipes.py serv/code
 cp serv.py serv/code
 echo "#!/usr/bin/env bash
 python3 code/serv.py" > serv/run
