@@ -31,7 +31,6 @@ class Character(Sprite):
   def draw(self):
     img=self.frames[self.dir][self.frame]
     self.screen.blit(img,(self.x*constants.TILESIZE,self.y*constants.TILESIZE))
-    pygame.display.flip()
 
   def move(self,dir):
     old_x=self.x

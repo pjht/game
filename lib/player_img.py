@@ -31,4 +31,3 @@ class PlayerImg(Sprite):
   def draw(self,x,y):
     img=self.frames[self.dir][self.frame]
     self.screen.blit(img,(x*constants.TILESIZE,y*constants.TILESIZE))
-    pygame.display.flip()

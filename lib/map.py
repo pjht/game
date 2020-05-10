@@ -68,7 +68,6 @@ class Map:
         y+=1
         if y==toplefty+constants.PORTHEIGHT:
           break
-    pygame.display.flip()
 
   def tileAt(self,x,y):
     try:
