@@ -24,7 +24,7 @@ class Block(Sprite):
     self.mp_upd=False
 
   def draw(self,x,y):
-    print("DRAW BLOCK")
+    # print("DRAW BLOCK")
     if self.tname==None:
       raise Exception("No texture name for block. Did you forget to call setTextureName()?".format())
     self.screen.blit(Block.background,(x*constants.TILESIZE,y*constants.TILESIZE))
@@ -32,8 +32,7 @@ class Block(Sprite):
     if texture==False:
       texture=Block.textures[self.tname]
     self.screen.blit(texture,(x*constants.TILESIZE,y*constants.TILESIZE))
-    pygame.display.flip()
-    sleep(0.05)
+    # sleep(0.05)
   def setTextureName(self,name):
     if not name in Block.textures.keys():
       raise Exception("{} is not a valid texture. Did you forget to call registerTexture(\"{}\")?".format(name,name))

@@ -29,11 +29,12 @@ def recv_str(sock,print_str=True):
       break
     str+=ch
   if print_str:
-    print("Got string: "+str)
+    pass
+    # print("Got string: "+str)
   return str
 
 def send_str(sock,str):
-  print("Sending string: "+str)
+  # print("Sending string: "+str)
   sock.send((str+"\n").encode("utf-8"))
 
 def recv_hash(sock):
@@ -43,7 +44,7 @@ def recv_hash(sock):
     key=recv_str(sock,False)
     val=recv_str(sock,False)
     hash[key]=val
-  print("Got hash: "+pp.pformat(hash))
+  # print("Got hash: "+pp.pformat(hash))
   return hash
 
 def recvall(sock):
@@ -54,7 +55,7 @@ def recvall(sock):
     data+=part
     if len(part)<BUFF_SIZE:
       break
-  print("Got data: "+pp.pformat(pickle.loads(data)))
+  # print("Got data: "+pp.pformat(pickle.loads(data)))
   return data
 
 
@@ -65,33 +66,33 @@ recipes.init()
 pygame.display.set_caption(UNAME)
 screen=pygame.display.set_mode((constants.WINDWIDTH,constants.WINDHEIGHT))
 sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-show_step("Connecting to game server")
+# show_step("Connecting to game server")
 sock.connect(("localhost",2000))
-show_step("Adding user to server (Sending ADD_USR {})".format(UNAME))
+# show_step("Adding user to server (Sending ADD_USR {})".format(UNAME))
 send_str(sock,"ADD_USR")
 send_str(sock,UNAME)
-show_step("Recieving UID")
+# show_step("Recieving UID")
 my_uid=int(recv_str(sock))
-show_step("Got UID {}".format(my_uid))
-show_step("Initializing UID map")
+# show_step("Got UID {}".format(my_uid))
+# show_step("Initializing UID map")
 uid_map={}
-show_step("Initializing level map")
+# show_step("Initializing level map")
 map=Map(screen,sock,my_uid)
 map.tiles={}
 
-show_step("Retreiving player position and facing (Sending GET_POS_FOR_UID {})".format(my_uid))
+# show_step("Retreiving player position and facing (Sending GET_POS_FOR_UID {})".format(my_uid))
 send_str(sock,"GET_POS_FOR_UID")
 send_str(sock,str(my_uid))
 x=int(recv_str(sock))
 y=int(recv_str(sock))
 fac=recv_str(sock)
-show_step("Got position ({},{}), facing {}".format(x,y,fac))
-show_step("Initializing player")
+# show_step("Got position ({},{}), facing {}".format(x,y,fac))
+# show_step("Initializing player")
 player=Player(x,y,map,screen,UNAME,"player_local")
 player.dir=fac
-show_step("Adding workbench to inventory")
+# show_step("Adding workbench to inventory")
 player.inv.addTile("workbench",1)
-show_step("Initializing misc game variables")
+# show_step("Initializing misc game variables")
 others={}
 running=True
 move=False

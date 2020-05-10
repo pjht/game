@@ -27,7 +27,7 @@ class Map:
       data+=part
       if len(part)<BUFF_SIZE:
         break
-    print(pickle.loads(data))
+    #print(pickle.loads(data))
     return data
 
 
