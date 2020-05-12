@@ -1,0 +1,1 @@
+nails_0.png.png 2 4, nails_1.png.png 35 7, nails_2.png.png 69 8, nails_3.png.png 99 11, nails_4.png.png 3 39, nails_5.png.png 35 39, nails_6.png.png 68 42, nails_7.png.png 101 42, nails_8.png.png 2 68, nails_9.png.png 34 68, nails_10.png.png 66 68, nails_11.png.png 98 67, nails_12.png.png 8 101, nails_13.png.png 35 98, nails_14.png.png 73 100, nails_15.png.png 102 100.
