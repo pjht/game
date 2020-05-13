@@ -7,21 +7,21 @@ from .gameregistry import GameRegistry
 from .block import Block
 import pickle
 class Map:
-  def __init__(self,screen,sock=None,uid=None):
+  def __init__(self,screen,sock=None):
     super().__init__()
     self.tiles={}
     self.screen=screen
     self.sock=sock
     self.uid=uid
 
-  def send_str(self,sock,str):
-    sock.send((str+"\n").encode("utf-8"))
+  def send_str(self,str):
+    self.sock.send((str+"\n").encode("utf-8"))
 
-  def recvall(self,sock):
+  def recvall(self):
     BUFF_SIZE=4096
     data=b''
     while True:
-      part=sock.recv(BUFF_SIZE)
+      part=self.sock.recv(BUFF_SIZE)
       data+=part
       if len(part)<BUFF_SIZE:
         break
@@ -65,33 +65,13 @@ class Map:
       return self.tiles[(x,y)]
     except KeyError as e:
       if self.sock:
-        self.send_str(self.sock,"BLOCK_AT_POS")
-        self.send_str(self.sock,str(x))
-        self.send_str(self.sock,str(y))
-        data=self.recvall(self.sock)
+        self.send_str("BLOCK_AT_POS")
+        self.send_str(str(x))
+        self.send_str(str(y))
+        data=self.recvall()
         block=pickle.loads(data)
-        if block==None:
-          name=""
-          num=random.randint(0,101)
-          if num<5:
-            num=random.randint(0,101)
-            if num<50:
-              name="tree"
-              self.addTile("tree",x,y)
-            else:
-              name="stone"
-              self.addTile("stone",x,y)
-          else:
-            name=constants.BACKGROUND
-            self.addTile(constants.BACKGROUND,x,y)
-          self.send_str(self.sock,"PLACE_BLOCK_AT")
-          self.send_str(self.sock,str(self.uid))
-          self.send_str(self.sock,str(x))
-          self.send_str(self.sock,str(y))
-          self.send_str(self.sock,str(name))
-        else:
-          block.screen=self.screen
-          self.tiles[(x,y)]=block
+        block.screen=self.screen
+        self.tiles[(x,y)]=block
       else:
         self.generateTile(x,y)
       return self.tiles[(x,y)]
