@@ -12,7 +12,6 @@ class Map:
     self.tiles={}
     self.screen=screen
     self.sock=sock
-    self.uid=uid
 
   def send_str(self,str):
     self.sock.send((str+"\n").encode("utf-8"))
