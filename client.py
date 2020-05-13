@@ -16,6 +16,47 @@ from time import sleep
 import pprint
 import blocks
 
+pp=pprint.PrettyPrinter(indent=2)
+
+def recv_str(sock,print_str=True):
+  str=""
+  ch=""
+  while True:
+    ch=sock.recv(1).decode("utf-8")
+    if ch=="\n":
+      break
+    str+=ch
+  if print_str:
+    pass
+    # print("Got string: "+str)
+  return str
+
+def send_str(sock,str):
+  # print("Sending string: "+str)
+  sock.send((str+"\n").encode("utf-8"))
+
+def recv_hash(sock):
+  hash={}
+  len=int(recv_str(sock,False))
+  for _ in range(len):
+    key=recv_str(sock,False)
+    val=recv_str(sock,False)
+    hash[key]=val
+  # print("Got hash: "+pp.pformat(hash))
+  return hash
+
+def recvall(sock):
+  BUFF_SIZE=4096
+  data=b''
+  while True:
+    part=sock.recv(BUFF_SIZE)
+    data+=part
+    if len(part)<BUFF_SIZE:
+      break
+  # print("Got data: "+pp.pformat(pickle.loads(data)))
+  return data
+
+
 pygame.init()
 screen=pygame.display.set_mode((constants.WINDWIDTH,constants.WINDHEIGHT))
 
