@@ -57,7 +57,9 @@ def recvall(sock):
   return data
 
 
+UNAME=input("UNAME:")
 pygame.init()
+pygame.display.set_caption(UNAME)
 screen=pygame.display.set_mode((constants.WINDWIDTH,constants.WINDHEIGHT))
 
 running=True
@@ -70,10 +72,18 @@ key_to_dir={
   pygame.K_RIGHT:"right"
 }
 
-map=Map(screen,None,0)
+sock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.connect(("localhost",30000))
+send_str(sock,UNAME)
+send_str(sock,"GET_POS")
+x=int(recv_str(sock))
+y=int(recv_str(sock))
+fac=recv_str(sock)
+map=Map(screen,sock)
 map.tiles={}
-player=Player(0,0,map,screen,"PJHT","player_local")
-player.direction="up"
+player=Player(x,y,map,screen,"PJHT","player_local")
+player.direction=fac
+
 
 while running:
   for event in pygame.event.get():
@@ -101,8 +111,27 @@ while running:
         direction="right"
   if move:
     player.move(direction)
+  send_str(sock,"SET_POS")
+  send_str(sock,str(player.x))
+  send_str(sock,str(player.y))
+  send_str(sock,player.direction)
   screen.fill([0,0,0])
   map.draw(player.x,player.y)
   player.draw()
+  send_str(sock,"GET_POS_MAP")
+  pos_map=recv_hash(sock)
+  print(pos_map)
+  for uname,pos in pos_map.items():
+    if uname==UNAME:
+      continue
+    pos=eval(pos) # FIXME: Eval is dangerous
+    char=PlayerImg(screen,"player")
+    char.direction=pos[2]
+    offsetx=pos[0]-player.x
+    offsety=pos[1]-player.y
+    char.draw(constants.CENTERX+offsetx,constants.CENTERY+offsety)
   pygame.display.flip()
   sleep(0.1)
+  
+send_str(sock,"CLOSE")
+sock.close()

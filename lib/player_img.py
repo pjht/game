@@ -18,10 +18,8 @@ class PlayerImg(Sprite):
       frames[direction]=frame_array
     return frames
 
-  def __init__(self,x,y,screen,type,*groups):
+  def __init__(self,screen,type,*groups):
     super().__init__(groups)
-    self.x=x
-    self.y=y
     self.screen=screen
     self.frames=self.loadFrames(type)
     self.frame=1
